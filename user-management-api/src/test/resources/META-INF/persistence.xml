@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd" 
+	version="2.0">
+	<persistence-unit name="resam">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<class>com.talentica.resam.entity.Permission</class>
+		<class>com.talentica.resam.entity.Role</class>
+		<class>com.talentica.resam.entity.RolePermission</class>
+		<class>com.talentica.resam.entity.User</class>
+		<class>com.talentica.resam.entity.UserAddressDetail</class>
+		<class>com.talentica.resam.entity.UserContactDetail</class>
+		<class>com.talentica.resam.entity.UserDetail</class>
+		<class>com.talentica.resam.entity.UserRole</class>
+		<properties>
+			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.format_sql" value="true"/>
+			<property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.ImprovedNamingStrategy"/>
+      <property name="hibernate.connection.charSet" value="UTF-8"/>
+		</properties>
+	</persistence-unit>
+</persistence>

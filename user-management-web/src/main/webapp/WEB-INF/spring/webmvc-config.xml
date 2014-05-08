@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sec="http://www.springframework.org/schema/security"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd	
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd	 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/security 
+		http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/cache
+		http://www.springframework.org/schema/cache/spring-cache.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	<mvc:annotation-driven/> 
+	<mvc:view-controller path="/" view-name="index" />
+	<mvc:view-controller path="/uncaughtException" />
+	<mvc:view-controller path="/resourceNotFound" />
+	<mvc:view-controller path="/expiredSessionException" />
+	<mvc:view-controller path="/403" view-name="403"/>
+	
+	<context:component-scan base-package="com.talentica" />
+	<aop:aspectj-autoproxy />
+	<context:annotation-config />
+	<context:spring-configured />
+	<tx:annotation-driven />
+	
+	
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:META-INF/spring/application.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<sec:global-method-security pre-post-annotations="enabled">
+		 <sec:expression-handler ref="expressionHandler"/>
+	</sec:global-method-security>
+
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	
+	<import resource="view-config.xml"/>
+
+	<bean id="exceptionResolver" class="com.talentica.resam.auth.exception.LoggingExceptionResolver" p:defaultErrorView="uncaughtException" p:defaultStatusCode="500">
+			<property name="exceptionMappings">
+				<props>
+					<prop key=".DataAccessException">uncaughtException</prop>
+					<prop key=".NoSuchRequestHandlingMethodException">resourceNotFound</prop>
+					<prop key=".TypeMismatchException">resourceNotFound</prop>
+					<prop key=".MissingServletRequestParameterException">resourceNotFound</prop>
+					<prop key=".AccessDeniedException">403</prop>
+				</props>
+			</property>
+			<property name="statusCodes">
+				<props>
+					<prop key=".DataAccessException">500</prop>
+					<prop key=".NoSuchRequestHandlingMethodException">400</prop>
+					<prop key=".TypeMismatchException">400</prop>
+					<prop key=".MissingServletRequestParameterException">400</prop>
+					<prop key=".AccessDeniedException">403</prop>
+				</props>
+			</property>
+	</bean >
+	
+	<bean id="htmlMediaType" class="org.springframework.http.MediaType">
+		<constructor-arg value="text" />
+		<constructor-arg value="html" />
+	</bean>
+	
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+					<property name="objectMapper" ref="jacksonObjectMapper" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="order" value="0" />
+		<property name="defaultContentType">
+			<ref bean="htmlMediaType" />
+		</property>
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+				<entry key="xml" value="application/xml" />
+			</map>
+		</property>
+	<!--	<property name="defaultViews">
+			<list>
+				
+			   <bean 
+					class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
+					<property name="objectMapper" ref="jacksonObjectMapper" />
+				</bean>
+				<bean id="xmlViewer" 
+						class="org.springframework.web.servlet.view.xml.MarshallingView">
+						<constructor-arg>
+						  <bean class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+							<property name="classesToBeBound">
+								<list></list>
+							</property>
+						  </bean>
+						</constructor-arg>
+				 </bean>
+			</list>
+		</property> -->
+		<property name="viewResolvers">
+			<list>
+				<ref bean="viewResolver"/>
+			</list>
+		</property>
+	</bean>	
+	
+	<bean id="jacksonObjectMapper" class="com.talentica.resam.jackson.CustomObjectMapper" />
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames" value="messages,error_messages" />
+	</bean>
+	
+		<bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView" />
+	</bean>
+
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/layouts/layouts.xml</value>
+				<value>/WEB-INF/views/error/view.xml</value>
+				<value>/WEB-INF/views/auth/view.xml</value>
+			</list>
+		</property>
+	</bean>
+	
+	<import resource="database-config.xml" />
+</beans>

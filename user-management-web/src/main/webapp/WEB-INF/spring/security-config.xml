@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:sec="http://www.springframework.org/schema/security" 
+    xmlns:beans="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"    
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/security 
+        http://www.springframework.org/schema/security/spring-security.xsd
+        http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd "> 
+
+	<!-- Configure realm for system administration users -->
+	<sec:http pattern="/api/**" create-session="stateless">
+	    <sec:http-basic/>  
+	</sec:http>
+	
+    <sec:http auto-config="true"  use-expressions="true" > 
+        <sec:form-login login-page="${resam.home.url}" authentication-failure-url="/authfailed" authentication-failure-handler-ref="failureHandler" authentication-success-handler-ref="successHandler"/>
+		<sec:logout invalidate-session="true" success-handler-ref="logoutSuccessHandler" />
+		<sec:access-denied-handler ref="accessDeniedHandler"/>
+		<sec:custom-filter position="FIRST" ref="sessionExpiryFilter" />
+		 <sec:intercept-url pattern="/*" access="permitAll" />
+    </sec:http> 
+    
+    <beans:bean id="sessionExpiryFilter" class="com.talentica.resam.security.filter.ExpiredSessionFilter"/>
+    
+    <sec:authentication-manager alias="authenticationManager"> 
+    <sec:authentication-provider user-service-ref="resamUserDetailsServiceImpl"> 
+    	<sec:password-encoder ref="resamPasswordEncoder"/>
+        </sec:authentication-provider> 
+    </sec:authentication-manager>
+	
+	<beans:bean id="resamPasswordEncoder" class="com.talentica.resam.auth.encryption.ResamPasswordEncoder">
+    </beans:bean>
+	
+    <beans:bean id="resamUserDetailsServiceImpl" class="com.talentica.resam.auth.service.ResamUserDetailsServiceImpl">
+    </beans:bean>
+    
+    <beans:bean id="accessDeniedHandler" class="com.talentica.resam.security.handler.ResamAccessDeniedHandler">
+		<beans:property name="accessDeniedUrl" value="/403" />
+	</beans:bean>
+	
+	<beans:bean id="logoutSuccessHandler" class="com.talentica.resam.security.handler.ResamLogoutSuccessHandler">
+    	<beans:property name="defaultTargetUrl" value="${resam.home.url}" />
+    	<beans:property name="alwaysUseDefaultTargetUrl" value="true" />
+	</beans:bean>
+	
+	<beans:import resource="webmvc-config.xml"/>
+
+	<beans:bean id="failureHandler" class="com.talentica.resam.security.handler.ResamLoginFailureHandler">
+ 		<beans:property name="defaultFailureUrl" value="/authfailed"/> 		
+	</beans:bean>
+	
+	<beans:bean id="successHandler" class="com.talentica.resam.security.handler.ResamLoginSuccessHandler" >
+		<beans:property name="defaultTargetUrl" value="/login_success"/>
+	</beans:bean>
+</beans:beans>
