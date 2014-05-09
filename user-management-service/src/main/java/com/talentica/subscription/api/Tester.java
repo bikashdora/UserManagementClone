@@ -2,7 +2,6 @@ package com.talentica.subscription.api;
 
 import java.net.URI;
 
-import javax.ws.rs.FormParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
@@ -28,9 +27,9 @@ public class Tester {
 	   // String jsonRes= service.accept(MediaType.APPLICATION_JSON).post(ClientResponse.class, form);
 	 
 	 		form.clear();
-			form.add("userName", "bikash123");
-			form.add("password", "password");			
-		    ClientResponse response = service.path("signInUser")
+			form.add("userEmail", "bikashdora@gmail.com");
+			
+		    ClientResponse response = service.path("resetPassword")
 		        .type(MediaType.APPLICATION_FORM_URLENCODED)
 		        .post(ClientResponse.class, form);		     
 		    System.out.println("Form response " + response.getEntity(String.class));

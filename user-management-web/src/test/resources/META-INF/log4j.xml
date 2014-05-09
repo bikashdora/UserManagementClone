@@ -10,7 +10,7 @@
 		</layout>
 	</appender>
 	<appender name="RFA" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="${catalina.home}/logs/resam.log"/>
+		<param name="File" value="D:/Logs/logs/resam.log"/>
 		<param name="DatePattern" value="'.'yyyy-MM-dd"/>
 		<param name="Append" value="true"/>
 		<layout class="org.apache.log4j.PatternLayout">
@@ -20,24 +20,27 @@
 	
 	<!-- Application Loggers -->
 	<logger name="com.talentica">	
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 	
 	<!-- 3rdparty Loggers -->
 	<logger name="org.springframework.core">
 		<level value="warn" />
 	</logger>
+	<logger name="org.springframework">
+		<level value="debug" />
+	</logger>
 	
 	<logger name="org.springframework.beans">
-		<level value="warn" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="org.springframework.context">
-		<level value="warn" />
+		<level value="debug" />
 	</logger>
 
 	<logger name="org.springframework.web">
-		<level value="warn" />
+		<level value="debug" />
 	</logger>
 	
 	<logger name="org.hibernate">
@@ -45,7 +48,7 @@
 	</logger>
 
 	<category name="org.springframework.security">
- 		<priority value="warn" />
+ 		<priority value="debug" />
 	</category>
 
 	<!-- Root Logger -->
